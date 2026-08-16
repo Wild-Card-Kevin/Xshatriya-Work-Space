@@ -60,7 +60,7 @@
     const initialNonConformData = [
         { title: '철골 용접 부위 미달 검토', alpha1: 'A', num1: '47', alpha2: 'A', num2: '48', content: '현장 3층 B구역 용접 비드 두께 기준 미달로 인한 보완 조치 필요.', completed: false }
     ];
-    const initialAutocadData = [
+    const initialTipBoardData = [
         { title: '오토캐드 고화질 PDF 다운로드 방법 (Ctrl+P)', content: '플롯터 세팅 시 AutoCAD PDF (High Quality Print).pc3 선택 후 백터 품질 2400 DPI 상향 설정.' },
         { title: '객체 결합(J) 및 분해(X) 사용 방법', content: 'J(Join)는 끝점이 맞아떨어져야 폴리선으로 합쳐짐.\nX(Explode)는 블록이나 폴리선을 낱개 선으로 분해함.' },
         { title: '그리기 순서 변경 (DR / TEXTTOFRONT)', content: 'DR 입력 후 Front/Back 선택.\n텍스트 가려짐 해제는 TEXTTOFRONT, 해치 내리기는 HATCHTOBACK 활용.' }
@@ -75,7 +75,7 @@
         'nonconformity': '⚠️ 부적합',
         'contacts': '📞 연락처',
         'specifications': '📁 파일관리',
-        'autocad': '💡 TIP',
+        'tipboard': '💡 TIP',
         'memo': '📝 메모장',
         'calculator': '🧮 계산기'
     };
@@ -155,7 +155,7 @@
             'nonconformity': 'btn-nonconformity',
             'contacts': 'btn-contacts',
             'specifications': 'btn-specifications',
-            'autocad': 'btn-autocad',
+            'tipboard': 'btn-tipboard',
             'memo': 'btn-memo',
             'calculator': 'btn-calculator'
         };
@@ -230,7 +230,7 @@
         summaryContainer.innerHTML = '';
 
         if (scheduleList.length === 0) {
-            summaryContainer.innerHTML = '<li class="stat-item" style="color:#94a3b8;">임박한 미완료 스케줄이 없다.</li>';
+            summaryContainer.innerHTML = '<li class="stat-item" style="color:#94a3b8;">마감이 임박한 일정이 없습니다.</li>';
             return;
         }
 
@@ -283,7 +283,7 @@
             isGlobalLocked = true;
             const lockBtn = document.getElementById('globalLockBtn');
             if (lockBtn) {
-                lockBtn.textContent = '수정';
+                lockBtn.textContent = '편집';
                 lockBtn.classList.add('active');
             }
             const rows = document.querySelectorAll('#contactsTableBody tr');
@@ -300,8 +300,8 @@
         const savedNonConform = localStorage.getItem('quality_nonconformity_data');
         (savedNonConform ? JSON.parse(savedNonConform) : initialNonConformData).forEach(item => addNonConformPost(item));
 
-        const savedAutocad = localStorage.getItem('quality_autocad_data');
-        (savedAutocad ? JSON.parse(savedAutocad) : initialAutocadData).forEach(item => addAutocadPost(item));
+        const saveTipBoard = localStorage.getItem('quality_tipboard_data');
+        (saveTipBoard ? JSON.parse(saveTipBoard) : initialTipBoardData).forEach(item => addTipBoardPost(item));
 
         const savedMemo = localStorage.getItem('quality_memo_data');
         if (savedMemo) document.getElementById('memoArea').value = savedMemo;
@@ -415,7 +415,7 @@
         });
         localStorage.setItem('quality_schedule_data', JSON.stringify(dataList));
         updateDashboardUpcomingSummary();
-        alert('스케줄 데이터가 성공적으로 저장되었다.');
+        alert('일정 데이터가 성공적으로 저장되었습니다.');
     }
 
     function toggleBoardBody(btn) {
@@ -447,11 +447,11 @@
             
             contentView.textContent = contentTextarea.value || '내용이 없습니다.';
             
-            btn.textContent = '수정';
-            btn.style.background = '#0284c7';
-            saveAutocadPosts();
+            btn.textContent = '편집';
+            btn.style.background = '#3b82f6';
+            saveTipBoardPosts();
         } else {
-            btn.textContent = '완료';
+            btn.textContent = '잠금';
             btn.style.background = '#059669';
             const textarea = card.querySelector('.board-content');
             if (textarea) autoResizeTextarea(textarea);
@@ -473,8 +473,8 @@
         });
     }
 
-    function addAutocadPost(data = {}) {
-        const container = document.getElementById('autocadContainer');
+    function addTipBoardPost(data = {}) {
+        const container = document.getElementById('tipBoardContainer');
         const card = document.createElement('div');
         card.className = 'board-card';
         card.innerHTML = `
@@ -495,9 +495,8 @@
 
                 <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 10px; padding-top: 8px; border-top: 1px dashed #e2e8f0;">
                     <button class="btn-copy" onclick="copyTipContent(this)">복사</button>
-                    <button class="action-btn btn-board-edit" onclick="toggleEditBoardCard(this)" style="background: #0284c7; color: white; padding: 6px 12px; font-size: 12px;">수정</button>
-
-                    <button class="btn-delete" onclick="openDeleteModal(this, 'autocad')">삭제</button>
+                    <button class="action-btn btn-board-edit" onclick="toggleEditBoardCard(this)" style="background: #3b82f6; color: white; padding: 6px 12px; font-size: 12px;">편집</button>
+                    <button class="btn-delete" onclick="openDeleteModal(this, 'tipboard')">삭제</button>
                 </div>
             </div>
         `;
@@ -508,8 +507,8 @@
         }, 10);
     }
 
-    function saveAutocadPosts() {
-        const cards = document.querySelectorAll('#autocadContainer .board-card');
+    function saveTipBoardPosts() {
+        const cards = document.querySelectorAll('#TipBoardContainer .board-card');
         const list = [];
         cards.forEach(card => {
             const titleInput = card.querySelector('.board-title');
@@ -519,8 +518,8 @@
                 content: contentTextarea ? contentTextarea.value : card.querySelector('.board-content-view').textContent
             });
         });
-        localStorage.setItem('quality_autocad_data', JSON.stringify(list));
-        alert('TIP 목록이 저장되었다.');
+        localStorage.setItem('quality_tipboard_data', JSON.stringify(list));
+        alert('저장이 완료되었습니다.');
     }
 
     function addBoardPost(data = {}) {
@@ -541,10 +540,10 @@
 
                 <div class="board-content-view" style="font-size: 14px; color: #475569; padding: 6px 0; white-space: pre-wrap; line-height: 1.5;">${data.content || '내용이 없습니다.'}</div>
 
-                <textarea class="board-content-textarea board-content edit-mode-only" placeholder="상세 내용을 작성하세요..." oninput="autoResizeTextarea(this); filterBoard()">${data.content || ''}</textarea>
+                <textarea class="board-content-textarea board-content edit-mode-only" placeholder="내용을 작성하세요..." oninput="autoResizeTextarea(this); filterBoard()">${data.content || ''}</textarea>
 
                 <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 10px; padding-top: 8px; border-top: 1px dashed #e2e8f0;">
-                    <button class="action-btn btn-board-edit" onclick="toggleEditBoardCard(this)" style="background: #0284c7; color: white; padding: 6px 12px; font-size: 12px;">수정</button>
+                    <button class="action-btn btn-board-edit" onclick="toggleEditBoardCard(this)" style="background: #3b82f6; color: white; padding: 6px 12px; font-size: 12px;">편집</button>
 
                     <button class="btn-delete" onclick="openDeleteModal(this, 'standard')">삭제</button>
                 </div>
@@ -644,7 +643,7 @@
                             <input type="file" accept="image/*" style="display:none;" onchange="handleImageUpload(event, this)">
                         </label>
                     </div>
-                    <button class="action-btn non-edit-btn" onclick="toggleEditCard(this)" style="background: #1e3a8a; color: white; padding: 6px 12px; font-size: 12px;">수정</button>
+                    <button class="action-btn non-edit-btn" onclick="toggleEditCard(this)" style="background: #1e3a8a; color: white; padding: 6px 12px; font-size: 12px;">편집</button>
                     <button class="action-btn btn-save" onclick="saveSingleCard(this)" style="padding: 6px 12px; font-size: 12px;">저장</button>
                     <button class="btn-delete" onclick="openDeleteModal(this, 'standard')">삭제</button>
                 </div>
@@ -668,13 +667,13 @@
             
             contentView.textContent = contentTextarea.value || '내용이 없습니다.';
             
-            btn.textContent = '수정';
+            btn.textContent = '편집';
             btn.style.background = '#1e3a8a';
             btn.style.color = '#ffffff';
             btn.style.border = 'none';
             saveNonConformPosts();
         } else {
-            btn.textContent = '완료';
+            btn.textContent = '잠금';
             btn.style.background = '#ffffff';
             btn.style.color = '#000000';
             btn.style.border = '1px solid #cbd5e1';
@@ -785,9 +784,9 @@
             <td><input type="text" class="contact-name" value="${data.name || ''}" placeholder="이름" style="width: 110px; min-width: 110px;" ${disabledAttr}></td>
             <td><input type="text" class="contact-role" value="${data.role || ''}" placeholder="직책/구분" style="width: 70px; min-width: 70px;" ${disabledAttr}></td>
             <td><input type="text" class="contact-phone" value="${formattedPhone}" placeholder="010-0000-0000" style="width: 120px; min-width: 120px;" onchange="this.value = formatPhoneNumber(this.value)" ${disabledAttr}></td>
-            <td><input type="text" class="contact-memo" value="${data.memo || ''}" placeholder="메모 입력" style="width: 100%; min-width: 300px;" ${disabledAttr}></td>
+            <td style="text-align: center;"><button class="btn-call" onclick="callContact(this)" style="background-color: #8489a7; color: white; padding: 7px 10px; font-size: 14px; border: none; border-radius: 4px; cursor: pointer;">📞</button></td>
+            <td><input type="text" class="contact-memo" value="${data.memo || ''}" placeholder="메모 입력" style="width: 100%; ㄴmin-width: 300px;" ${disabledAttr}></td>
             <td style="text-align: center;"><button class="btn-copy" onclick="copyContactInfo(this)">복사</button></td>
-            <td style="text-align: center;"><button class="btn-call" onclick="callContact(this)" style="background-color: #10b981; color: white; padding: 6px 10px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer;">전화</button></td>
             <td style="text-align: center;"><button class="btn-delete" onclick="openDeleteModal(this, 'standard')">삭제</button></td>
         `;
         tbody.appendChild(tr);
@@ -815,10 +814,10 @@
         });
 
         if (isGlobalLocked) {
-            btn.textContent = '수정';
+            btn.textContent = '편집';
             btn.classList.add('active');
         } else {
-            btn.textContent = '완료';
+            btn.textContent = '잠금';
             btn.classList.remove('active');
         }
     }
@@ -896,8 +895,8 @@
         targetElementToDelete = btn.closest('tr') || btn.closest('.board-card') || btn.closest('.non-conform-card');
         const modalText = document.getElementById('modalText');
         
-        if (type === 'autocad') {
-            modalText.textContent = "아직 다 못 외웠는데 삭제하려고?";
+        if (type === 'tipboard') {
+            modalText.textContent = "정말로 삭제하시겠습니까?";
         } else {
             modalText.textContent = "정말로 삭제하시겠습니까?";
         }
@@ -1029,7 +1028,7 @@ function navigateToTab(tabId) {
         'board': 'btn-board',
         'nonconformity': 'btn-nonconformity',
         'contacts': 'btn-contacts',
-        'autocad': 'btn-autocad',
+        'tipboard': 'btn-tipboard',
         'memo': 'btn-memo',
         'calculator': 'btn-calculator'
     };
